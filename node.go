@@ -9,8 +9,8 @@ import (
 type Node struct {
 	Parent         *Node
 	Children       []*Node
-	Move           int
-	RemainingMoves []int
+	Move           Move
+	RemainingMoves []Move
 	PlayerThatMoved int
 	Wins           int
 	Visits         int
@@ -34,20 +34,20 @@ func (n *Node) SelectMostPromisingNode() *Node {
 	return bestChild
 }
 
-func (n *Node) PickRandomRemainingMove() int {
+func (n *Node) PickRandomRemainingMove() Move {
 	length := len(n.RemainingMoves)
 	index := rand.Intn(length)
 	move := n.RemainingMoves[index]
 
 	// Remove the selected move
 	n.RemainingMoves[index] = n.RemainingMoves[length-1]
-	// n.RemainingMoves[length - 1] = nil  // avoid memory leaks when pointer or struct containing pointers
+	n.RemainingMoves[length - 1] = nil  // avoid memory leaks
 	n.RemainingMoves = n.RemainingMoves[:length-1]
 
 	return move
 }
 
-func (n *Node) AddChild(move int, state State) *Node {
+func (n *Node) AddChild(move Move, state State) *Node {
 	node := &Node{
 		Parent:         n,
 		Move:           move,

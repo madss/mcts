@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func uct(initialState State, iterations int) int {
+func uct(initialState State, iterations int) Move {
 	root := &Node{
 		PlayerThatMoved: initialState.PlayerThatMoved(),
 		RemainingMoves: initialState.PossibleMoves(),
@@ -16,13 +16,13 @@ func uct(initialState State, iterations int) int {
 		// Select
 		for len(node.RemainingMoves) == 0 && len(node.Children) > 0 {
 			node = node.SelectMostPromisingNode()
-			state.PerformMove(node.Move)
+			node.Move.Perform(state)
 		}
 
 		// Expand
 		if len(node.RemainingMoves) > 0 {
 			move := node.PickRandomRemainingMove()
-			state.PerformMove(move)
+			move.Perform(state)
 			node = node.AddChild(move, state)
 		}
 
@@ -47,7 +47,7 @@ func uct(initialState State, iterations int) int {
 func Play(state State, debug bool) {
 	for len(state.PossibleMoves()) > 0 {
 		move := uct(state, 50)
-		state.PerformMove(move)
+		move.Perform(state)
 		if debug {
 			fmt.Printf("Player %v took move %v\n\n", state.PlayerThatMoved(), move)
 		}

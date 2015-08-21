@@ -24,24 +24,18 @@ func (n *NimState) PlayerThatMoved() int {
 	return n.player
 }
 
-func (n *NimState) PossibleMoves() []int {
+func (n *NimState) PossibleMoves() []Move {
 	count := int(math.Min(4.0, float64(n.chips)))
-	moves := make([]int, count)
+	moves := make([]Move, count)
 	for i := 0; i < count; i++ {
-		moves[i] = i + 1
+		moves[i] = NimMove{ chips: i + 1 }
 	}
 	return moves
 }
 
-func (n *NimState) PerformMove(m int) {
-	n.player = (n.player + 1) % 2
-	n.chips -= m
-}
-
 func (n *NimState) PerformRandomMove() bool {
-	moves := n.PossibleMoves()
-	index := rand.Intn(len(moves))
-	n.PerformMove(moves[index])
+	count := int(math.Min(4.0, float64(n.chips)))
+	NimMove{ chips: rand.Intn(count) + 1 }.Perform(n)
 	return n.chips > 0
 }
 
@@ -51,4 +45,20 @@ func (n *NimState) Winner(player int) bool {
 
 func (n *NimState) Debug() {
 	fmt.Printf("Player: %d, Chips: %d\n", n.player, n.chips)
+}
+
+type NimMove struct {
+	chips int
+}
+
+func (n NimMove) Perform(state State) {
+	s, ok := state.(*NimState)
+	if ok {
+		s.chips -= n.chips
+		s.player = (s.player + 1) % 2
+	}
+}
+
+func (n NimMove) String() string {
+	return fmt.Sprintf("Take %d chips", n.chips)
 }
