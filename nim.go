@@ -15,7 +15,7 @@ func nim(chips int) State {
 	return &NimState{1, chips}
 }
 
-func (n *NimState) Copy() State {
+func (n *NimState) CopyRandomized() State {
 	copy := *n
 	return &copy
 }

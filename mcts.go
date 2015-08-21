@@ -11,7 +11,7 @@ func uct(initialState State, iterations int) int {
 	}
 	for i := 0; i < iterations; i++ {
 		node := root
-		state := initialState.Copy()
+		state := initialState.CopyRandomized()
 
 		// Select
 		for len(node.RemainingMoves) == 0 && len(node.Children) > 0 {
