@@ -1,4 +1,4 @@
-package main
+package mcts
 
 import "testing"
 
@@ -15,28 +15,28 @@ func TestAddChild(t *testing.T) {
 }
 
 func TestUpdate(t *testing.T) {
-	node := Node{ Wins: 10, Visits: 20 }
+	n := node{ Wins: 10, Visits: 20 }
 
-	node.Update(true)
-	if node.Wins != 11 || node.Visits != 21 {
+	n.Update(true)
+	if n.Wins != 11 || n.Visits != 21 {
 		t.Error("Failed to update a win")
 	}
 
-	node.Update(false)
-	if node.Wins != 11 || node.Visits != 22 {
+	n.Update(false)
+	if n.Wins != 11 || n.Visits != 22 {
 		t.Error("Failed to update a loss")
 	}
 }
 
 func TestMostVisitedChild(t *testing.T) {
-	node := Node{
-		Children: []*Node{
-			&Node{ Visits: 42 },
-			&Node{ Visits: 100 },
-			&Node{ Visits: 3 },
+	n := node{
+		Children: []*node{
+			&node{ Visits: 42 },
+			&node{ Visits: 100 },
+			&node{ Visits: 3 },
 		},
 	}
-	if node.MostVisitedChild() != node.Children[1] {
+	if n.MostVisitedChild() != n.Children[1] {
 		t.Error("Failed to find most visited node")
 	}
 }

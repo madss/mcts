@@ -1,4 +1,4 @@
-package main
+package mcts
 
 import (
 	"fmt"
@@ -6,9 +6,9 @@ import (
 	"math/rand"
 )
 
-type Node struct {
-	Parent         *Node
-	Children       []*Node
+type node struct {
+	Parent         *node
+	Children       []*node
 	Move           Move
 	RemainingMoves []Move
 	PlayerThatMoved int
@@ -16,8 +16,8 @@ type Node struct {
 	Visits         int
 }
 
-func (n *Node) SelectMostPromisingNode() *Node {
-	var bestChild *Node
+func (n *node) SelectMostPromisingNode() *node {
+	var bestChild *node
 	var bestScore float64 = 0.0
 
 	for _, child := range n.Children {
@@ -34,7 +34,7 @@ func (n *Node) SelectMostPromisingNode() *Node {
 	return bestChild
 }
 
-func (n *Node) PickRandomRemainingMove() Move {
+func (n *node) PickRandomRemainingMove() Move {
 	length := len(n.RemainingMoves)
 	index := rand.Intn(length)
 	move := n.RemainingMoves[index]
@@ -47,37 +47,37 @@ func (n *Node) PickRandomRemainingMove() Move {
 	return move
 }
 
-func (n *Node) AddChild(move Move, state State) *Node {
-	node := &Node{
+func (n *node) AddChild(move Move, state State) *node {
+	newNode := &node{
 		Parent:         n,
 		Move:           move,
 		PlayerThatMoved: state.PlayerThatMoved(),
 		RemainingMoves: state.PossibleMoves(),
 	}
-	n.Children = append(n.Children, node)
-	return node
+	n.Children = append(n.Children, newNode)
+	return newNode
 }
 
-func (n *Node) Update(won bool) {
+func (n *node) Update(won bool) {
 	if won {
 		n.Wins += 1
 	}
 	n.Visits++
 }
 
-func (n *Node) MostVisitedChild() *Node {
+func (n *node) MostVisitedChild() *node {
 	var mostVisits int
-	var mostVisited *Node
-	for _, node := range n.Children {
-		if node.Visits > mostVisits {
-			mostVisits = node.Visits
-			mostVisited = node
+	var mostVisited *node
+	for _, child := range n.Children {
+		if child.Visits > mostVisits {
+			mostVisits = child.Visits
+			mostVisited = child
 		}
 	}
 	return mostVisited
 }
 
-func (n *Node) Debug() {
+func (n *node) Debug() {
 	for _, child := range n.Children {
 		fmt.Printf("Move: %v, wins: %v, visits: %v\n", child.Move, child.Wins, child.Visits)
 	}

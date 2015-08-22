@@ -1,8 +1,11 @@
 package main
 
-import "testing"
+import (
+	"testing"
+	"github.com/madss/mcts"
+)
 
-func TestNim(t *testing.T) {
+func TestSubtract(t *testing.T) {
 	cases := []struct {
 		chips, winner int
 	}{
@@ -18,8 +21,8 @@ func TestNim(t *testing.T) {
 		{ 10, 1 },
 	}
 	for _, c := range cases {
-		state := nim(c.chips)
-		Play(state, false)
+		state := subtract(c.chips)
+		mcts.Play(state, false)
 		if !state.Winner(c.winner) {
 			t.Error("Player %d should win with %d chips", c.winner, c.chips)
 		}

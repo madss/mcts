@@ -1,11 +1,11 @@
-package main
+package mcts
 
 import (
 	"fmt"
 )
 
 func uct(initialState State, iterations int) Move {
-	root := &Node{
+	root := &node{
 		PlayerThatMoved: initialState.PlayerThatMoved(),
 		RemainingMoves: initialState.PossibleMoves(),
 	}
@@ -53,14 +53,4 @@ func Play(state State, debug bool) {
 		}
 	}
 
-}
-
-func main() {
-	state := nim(15)
-	Play(state, true)
-	if state.Winner(0) {
-		fmt.Println("Player 0 won")
-	} else {
-		fmt.Println("Player 1 won")
-	}
 }

@@ -1,6 +1,6 @@
-package main
+package mcts
 
-// State defines methods required to perform a monte carlo tree search
+// State defines methods required to perform a monte carlo tree search.
 type State interface {
 	// CopyRandomized creates a copy of the current state with all
 	// unknown state randomized. For games with absolute information
