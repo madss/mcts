@@ -66,7 +66,7 @@ func (s SubtractMove) String() string {
 
 func main() {
 	state := subtract(15)
-	mcts.Play(state, true)
+	mcts.New().Play(state, 50)
 	if state.Winner(0) {
 		fmt.Println("Player 0 won")
 	} else {

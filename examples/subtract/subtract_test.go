@@ -22,7 +22,7 @@ func TestSubtract(t *testing.T) {
 	}
 	for _, c := range cases {
 		state := subtract(c.chips)
-		mcts.Play(state, false)
+		mcts.New().Play(state, 50)
 		if !state.Winner(c.winner) {
 			t.Error("Player %d should win with %d chips", c.winner, c.chips)
 		}

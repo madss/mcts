@@ -16,7 +16,7 @@ type node struct {
 	Visits         int
 }
 
-func (n *node) SelectMostPromisingNode() *node {
+func (n *node) SelectMostPromisingNode(k float64) *node {
 	var bestChild *node
 	var bestScore float64 = 0.0
 

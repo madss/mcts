@@ -4,7 +4,19 @@ import (
 	"fmt"
 )
 
-func uct(initialState State, iterations int) Move {
+type mcts struct {
+	K float64
+	Debug bool
+}
+
+func New() *mcts {
+	return &mcts{
+		K: 1.0,
+		Debug: false,
+	}
+}
+
+func (m *mcts) Find(initialState State, iterations int) Move {
 	root := &node{
 		PlayerThatMoved: initialState.PlayerThatMoved(),
 		RemainingMoves: initialState.PossibleMoves(),
@@ -15,7 +27,7 @@ func uct(initialState State, iterations int) Move {
 
 		// Select
 		for len(node.RemainingMoves) == 0 && len(node.Children) > 0 {
-			node = node.SelectMostPromisingNode()
+			node = node.SelectMostPromisingNode(m.K)
 			node.Move.Perform(state)
 		}
 
@@ -44,11 +56,11 @@ func uct(initialState State, iterations int) Move {
 	return root.MostVisitedChild().Move
 }
 
-func Play(state State, debug bool) {
+func (m *mcts) Play(state State, iterations int) {
 	for len(state.PossibleMoves()) > 0 {
-		move := uct(state, 50)
+		move := m.Find(state, iterations)
 		move.Perform(state)
-		if debug {
+		if m.Debug {
 			fmt.Printf("Player %v took move %v\n\n", state.PlayerThatMoved(), move)
 		}
 	}
