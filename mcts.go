@@ -1,33 +1,18 @@
 package mcts
 
-import (
-	"fmt"
-)
-
-type mcts struct {
-	K float64
-	Debug bool
-}
-
-func New() *mcts {
-	return &mcts{
-		K: 1.0,
-		Debug: false,
-	}
-}
-
-func (m *mcts) Find(initialState State, iterations int) Move {
+func Suggest(initialState State, iterations int, k float64) Move {
 	root := &node{
-		PlayerThatMoved: initialState.PlayerThatMoved(),
-		RemainingMoves: initialState.PossibleMoves(),
+		CurrentPlayer: initialState.CurrentPlayer(),
+		RemainingMoves:  initialState.PossibleMoves(),
 	}
+
 	for i := 0; i < iterations; i++ {
 		node := root
-		state := initialState.CopyRandomized()
+		state := initialState.Copy()
 
 		// Select
 		for len(node.RemainingMoves) == 0 && len(node.Children) > 0 {
-			node = node.SelectMostPromisingNode(m.K)
+			node = node.SelectMostPromisingNode(k)
 			node.Move.Perform(state)
 		}
 
@@ -39,30 +24,34 @@ func (m *mcts) Find(initialState State, iterations int) Move {
 		}
 
 		// Rollout
-		if len(state.PossibleMoves()) > 1 {
-			for state.PerformRandomMove() {}
+		for state.PerformRandomMove() {
 		}
 
 		// Backpropagate
-		for node != nil {
-			node.Update(state.Winner(node.PlayerThatMoved))
+		for node.Parent != nil {
+			node.Update(state.Winner(node.Parent.CurrentPlayer))
 			node = node.Parent
 		}
+		node.Update(false)
 	}
-
-	//root.Debug()
 
 	// Return the best move
-	return root.MostVisitedChild().Move
+	mostVisitedChild := root.MostVisitedChild()
+	if mostVisitedChild != nil {
+		return mostVisitedChild.Move
+	} else {
+		return nil
+	}
 }
 
-func (m *mcts) Play(state State, iterations int) {
-	for len(state.PossibleMoves()) > 0 {
-		move := m.Find(state, iterations)
-		move.Perform(state)
-		if m.Debug {
-			fmt.Printf("Player %v took move %v\n\n", state.PlayerThatMoved(), move)
+func PlayOut(state State, iterations int, k float64) (moves []Move) {
+	for {
+		move := Suggest(state, iterations, k)
+		if move != nil {
+			move.Perform(state)
+			moves = append(moves, move)
+		} else {
+			return
 		}
 	}
-
 }

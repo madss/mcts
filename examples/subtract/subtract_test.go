@@ -2,7 +2,7 @@ package main
 
 import (
 	"testing"
-	"github.com/madss/mcts"
+	"mcts"
 )
 
 func TestSubtract(t *testing.T) {
@@ -22,9 +22,9 @@ func TestSubtract(t *testing.T) {
 	}
 	for _, c := range cases {
 		state := subtract(c.chips)
-		mcts.New().Play(state, 50)
+		moves := mcts.PlayOut(state, 100, 1.0)
 		if !state.Winner(c.winner) {
-			t.Error("Player %d should win with %d chips", c.winner, c.chips)
+			t.Error("The wrong player won", c.winner, c.chips, moves)
 		}
 	}
 }

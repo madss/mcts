@@ -5,12 +5,11 @@ for aid development and testing of board and card games.
 
 ## Getting started
 
-This is as simple as
-
-    go build
-    ./mcts
+See the examples directory for how to use this library.
 
 ## Examples
 
-nim.go is a simple implementation of nim (or more correctly, the
+subtract is a simple implementation of nim (or more correctly, the
 subtraction game), intended to show how to use the package.
+
+tictactoe is the classic three-in-a-row game.

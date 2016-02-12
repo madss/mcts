@@ -1,10 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
-	"math"
-	"math/rand"
-	"github.com/madss/mcts"
+ 	"math/rand"
+	"mcts"
 )
 
 type SubtractState struct {
@@ -12,21 +12,29 @@ type SubtractState struct {
 	chips  int
 }
 
-func subtract(chips int) mcts.State {
-	return &SubtractState{1, chips}
+func subtract(chips int) *SubtractState {
+	return &SubtractState{ chips: chips }
 }
 
-func (s *SubtractState) CopyRandomized() mcts.State {
+func (s *SubtractState) Copy() mcts.State {
 	copy := *s
 	return &copy
 }
 
-func (s *SubtractState) PlayerThatMoved() int {
+func (s *SubtractState) CurrentPlayer() int {
 	return s.player
 }
 
+func (s *SubtractState) PossibleMoveCount() int {
+	moves := 4
+	if s.chips < moves {
+		moves = s.chips
+	}
+	return moves
+}
+
 func (s *SubtractState) PossibleMoves() []mcts.Move {
-	count := int(math.Min(4.0, float64(s.chips)))
+	count := s.PossibleMoveCount()
 	moves := make([]mcts.Move, count)
 	for i := 0; i < count; i++ {
 		moves[i] = SubtractMove{ chips: i + 1 }
@@ -35,17 +43,25 @@ func (s *SubtractState) PossibleMoves() []mcts.Move {
 }
 
 func (s *SubtractState) PerformRandomMove() bool {
-	count := int(math.Min(4.0, float64(s.chips)))
-	SubtractMove{ chips: rand.Intn(count) + 1 }.Perform(s)
-	return s.chips > 0
+	count := s.PossibleMoveCount()
+	if count > 0 {
+		SubtractMove{ chips: rand.Intn(count) + 1 }.Perform(s)
+		return true
+	}
+	return false
 }
 
 func (s *SubtractState) Winner(player int) bool {
 	return player == s.player
 }
 
-func (s *SubtractState) Debug() {
-	fmt.Printf("Player: %d, Chips: %d\n", s.player, s.chips)
+func (s *SubtractState) String() string {
+	var buffer bytes.Buffer
+	for i := 0; i < s.chips; i++ {
+		buffer.WriteString("*")
+	}
+	fmt.Fprintf(&buffer, " (%d chips)", s.chips)
+	return buffer.String()
 }
 
 type SubtractMove struct {
@@ -53,23 +69,31 @@ type SubtractMove struct {
 }
 
 func (s SubtractMove) Perform(state mcts.State) {
-	subtractState, ok := state.(*SubtractState)
-	if ok {
-		subtractState.chips -= s.chips
+	subtractState := state.(*SubtractState)
+	subtractState.chips -= s.chips
+	if subtractState.chips > 0 {
 		subtractState.player = (subtractState.player + 1) % 2
 	}
 }
 
-func (s SubtractMove) String() string {
-	return fmt.Sprintf("Take %d chips", s.chips)
-}
-
 func main() {
 	state := subtract(15)
-	mcts.New().Play(state, 50)
+	for state.PossibleMoveCount() > 0 {
+	  var move SubtractMove
+	  fmt.Println(state.String())
+	  if state.CurrentPlayer() > 0 {
+			move = mcts.Suggest(state, 50, 1.0).(SubtractMove)
+			move.Perform(state)
+			fmt.Printf("Computer took %d chips\n", move.chips)
+		} else {
+			fmt.Print("How many chips do you take: ")
+			fmt.Scan(&move.chips)
+			move.Perform(state)
+		}
+	}
 	if state.Winner(0) {
-		fmt.Println("Player 0 won")
+		fmt.Println("You won!")
 	} else {
-		fmt.Println("Player 1 won")
+		fmt.Println("You lost")
 	}
 }

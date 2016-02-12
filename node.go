@@ -1,19 +1,18 @@
 package mcts
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 )
 
 type node struct {
-	Parent         *node
-	Children       []*node
-	Move           Move
-	RemainingMoves []Move
-	PlayerThatMoved int
-	Wins           int
-	Visits         int
+	Parent          *node
+	Children        []*node
+	Move            Move
+	RemainingMoves  []Move
+	CurrentPlayer   int
+	Wins            int
+	Visits          int
 }
 
 func (n *node) SelectMostPromisingNode(k float64) *node {
@@ -41,7 +40,7 @@ func (n *node) PickRandomRemainingMove() Move {
 
 	// Remove the selected move
 	n.RemainingMoves[index] = n.RemainingMoves[length-1]
-	n.RemainingMoves[length - 1] = nil  // avoid memory leaks
+	n.RemainingMoves[length-1] = nil // avoid memory leaks
 	n.RemainingMoves = n.RemainingMoves[:length-1]
 
 	return move
@@ -49,10 +48,10 @@ func (n *node) PickRandomRemainingMove() Move {
 
 func (n *node) AddChild(move Move, state State) *node {
 	newNode := &node{
-		Parent:         n,
-		Move:           move,
-		PlayerThatMoved: state.PlayerThatMoved(),
-		RemainingMoves: state.PossibleMoves(),
+		Parent:          n,
+		Move:            move,
+		CurrentPlayer:   state.CurrentPlayer(),
+		RemainingMoves:  state.PossibleMoves(),
 	}
 	n.Children = append(n.Children, newNode)
 	return newNode
@@ -60,7 +59,7 @@ func (n *node) AddChild(move Move, state State) *node {
 
 func (n *node) Update(won bool) {
 	if won {
-		n.Wins += 1
+		n.Wins++
 	}
 	n.Visits++
 }
@@ -75,10 +74,4 @@ func (n *node) MostVisitedChild() *node {
 		}
 	}
 	return mostVisited
-}
-
-func (n *node) Debug() {
-	for _, child := range n.Children {
-		fmt.Printf("Move: %v, wins: %v, visits: %v\n", child.Move, child.Wins, child.Visits)
-	}
 }

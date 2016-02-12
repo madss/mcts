@@ -15,7 +15,7 @@ func TestAddChild(t *testing.T) {
 }
 
 func TestUpdate(t *testing.T) {
-	n := node{ Wins: 10, Visits: 20 }
+	n := node{Wins: 10, Visits: 20}
 
 	n.Update(true)
 	if n.Wins != 11 || n.Visits != 21 {
@@ -29,15 +29,22 @@ func TestUpdate(t *testing.T) {
 }
 
 func TestMostVisitedChild(t *testing.T) {
-	n := node{
+	var n node
+
+	n = node{
+		Children: []*node{},
+	}
+	if n.MostVisitedChild() != nil {
+		t.Error("Failed to return nil for empty list")
+	}
+	n = node{
 		Children: []*node{
-			&node{ Visits: 42 },
-			&node{ Visits: 100 },
-			&node{ Visits: 3 },
+			&node{Visits: 42},
+			&node{Visits: 100},
+			&node{Visits: 3},
 		},
 	}
 	if n.MostVisitedChild() != n.Children[1] {
 		t.Error("Failed to find most visited node")
 	}
 }
-

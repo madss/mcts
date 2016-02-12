@@ -2,38 +2,36 @@ package mcts
 
 // State defines methods required to perform a monte carlo tree search.
 type State interface {
-	// CopyRandomized creates a copy of the current state with all
-	// unknown state randomized. For games with absolute information
-	// randomization doesn't matter, but for a card game, for instance, all
-	// unrevealed cards must be shuffled to avoid biasing the suggested move
-	// towards a particular sequence of cards.
-	CopyRandomized() State
+	// Copy creates a copy of the current state. For games with hidden
+	// information, all unrevealed state must be randomized to avoid
+	// biasing the suggested move towards, for instance, a particular
+	// ordering of cards
+	Copy() State
 
-	// PlayerThatMoved returns the zero-based index of the player that
-	// performed the most recent move. The value before the first move is
-	// performed is irrelevant, but right after the first move is performed it
-	// should return zero.
-	PlayerThatMoved() int
+	// CurrentPlayer returns the zero-based index of the player that
+	// is about to perform on of the possible moves.
+	CurrentPlayer() int
 
 	// PossibleMoves returns a list of moves currently available.
 	PossibleMoves() []Move
 
 	// PerformRandomMove updates the state to reflect a randomly chosen move.
-	// The implementation should be equivalent to
+	// This allows for optimizations by not requiring all moves to be generated.
+	// It returns whether it was able to perform a move or no more moves were
+	// available. The implementation should be equivalent to
 	//
 	//     moves := state.PossibleMoves()
-	//     index := rand.Intn(len(moves))
-	//     moves[index].Perform(state)
-	//
-	// but allows for optimizations by not requiring all moves to be generated.
-	// It returns whether more moves are available, equivalent to
-	//
-	//     len(state.PossibleMoves()) > 0
+	//     if len(moves) > 0 {
+	//         index := rand.Intn(len(moves))
+	//         moves[index].Perform(state)
+	//         return true
+	//     }
+	//     return false
 	PerformRandomMove() bool
 
 	// Winner return whether the nth player is considered a winner based on the
-	// current state of the game. The behaviour is until there are no more
-	// possible moves, in which case the game is considered to be over.
+	// current state of the game. The behaviour is undefined until there are no
+	// more possible moves, in which case the game is considered to be over.
 	Winner(int) bool
 }
 
@@ -41,7 +39,4 @@ type State interface {
 type Move interface {
 	// Perform updates the state to reflect the move.
 	Perform(State)
-
-	// String return a string representation of the move.
-	String() string
 }
